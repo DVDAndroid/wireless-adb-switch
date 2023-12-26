@@ -20,6 +20,11 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.smoothie.widgetFactory.CollapsingToolbarActivity
+import com.smoothie.wirelessDebuggingSwitch.adb.AdbWifi
+import com.smoothie.wirelessDebuggingSwitch.adb.RootAdbWifi
+import com.smoothie.wirelessDebuggingSwitch.adb.RootlessAdbWifi
+import com.smoothie.wirelessDebuggingSwitch.adb.ShizukuAdbWifi
+import com.smoothie.wirelessDebuggingSwitch.adb.hasSufficientPrivileges
 import com.topjohnwu.superuser.Shell
 
 class GrantPermissionsActivity : CollapsingToolbarActivity(
@@ -30,7 +35,9 @@ class GrantPermissionsActivity : CollapsingToolbarActivity(
 
     companion object {
         fun startIfNeeded(context: Context) {
-            if (!isNotificationPermissionGranted(context) || !hasSufficientPrivileges())
+            val adbWifi = AdbWifi.getPrivilegeMethod(context)
+
+            if (!isNotificationPermissionGranted(context) || adbWifi == null || !adbWifi.hasSufficientPrivileges())
                 context.startActivity(Intent(context, GrantPermissionsActivity::class.java))
         }
     }
@@ -53,7 +60,11 @@ class GrantPermissionsActivity : CollapsingToolbarActivity(
         private lateinit var rootAccessButton: Button
         private lateinit var shizukuButton: Button
         private lateinit var refreshShizukuStatusButton: Button
+        private lateinit var refreshWriteSecureSettingsStatus: Button
         private lateinit var continueButton: MaterialButton
+        private lateinit var writeSecureSettingsCommandContainer: View
+        private lateinit var writeSecureSettingsStatus: Button
+        private lateinit var copyWriteSecureSettingsCommandButton: View
 
         /**
          * Requests a permission to send notifications,
@@ -65,7 +76,7 @@ class GrantPermissionsActivity : CollapsingToolbarActivity(
             if (currentApi < Build.VERSION_CODES.TIRAMISU) {
                 val message =
                     "requestNotificationsPermission OnClickListener called on API $currentApi, " +
-                    "required API is Tiramisu (33)"
+                            "required API is Tiramisu (33)"
                 Log.e(TAG, message)
                 return@OnClickListener
             }
@@ -77,8 +88,7 @@ class GrantPermissionsActivity : CollapsingToolbarActivity(
                 val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
                     .putExtra(Settings.EXTRA_APP_PACKAGE, requireActivity().packageName)
                 startActivity(intent)
-            }
-            else {
+            } else {
                 requestPermissions(arrayOf(permission), requestCode)
             }
         }
@@ -110,13 +120,21 @@ class GrantPermissionsActivity : CollapsingToolbarActivity(
             rootAccessButton = view.findViewById(R.id.grant_root_access)
             shizukuButton = view.findViewById(R.id.grant_shizuku)
             refreshShizukuStatusButton = view.findViewById(R.id.refresh_shizuku_status)
+            refreshWriteSecureSettingsStatus = view.findViewById(R.id.refresh_write_secure_settings_status)
             continueButton = view.findViewById(R.id.button_continue)
+            writeSecureSettingsCommandContainer = view.findViewById(R.id.write_secure_settings_command_container)
+            writeSecureSettingsStatus = view.findViewById(R.id.write_secure_settings_status)
+            copyWriteSecureSettingsCommandButton = view.findViewById(R.id.button_copy_write_secure_settings_command)
 
             notificationsButton.setOnClickListener(requestNotificationsPermission)
             rootAccessButton.setOnClickListener(requestRootAccess)
             shizukuButton.setOnClickListener(requestShizukuPermission)
             refreshShizukuStatusButton.setOnClickListener { updatePrivilegeLevelCards() }
+            refreshWriteSecureSettingsStatus.setOnClickListener { updatePrivilegeLevelCards() }
             rootAccessButton.setOnClickListener { restartAppForRootAccessRefresh() }
+            copyWriteSecureSettingsCommandButton.setOnClickListener {
+                copyText(requireContext(), "ADB command", getString(R.string.command_write_secure_settings))
+            }
 
             continueButton.fixTextAlignment()
             continueButton.setOnClickListener {
@@ -162,27 +180,28 @@ class GrantPermissionsActivity : CollapsingToolbarActivity(
         }
 
         private fun updatePrivilegeLevelCards() {
-            if (Shell.isAppGrantedRoot() == true) {
+            if (RootlessAdbWifi(requireContext()).hasSufficientPrivileges()) {
+                writeSecureSettingsCommandContainer.visibility = View.GONE
+                writeSecureSettingsStatus.visibility = View.VISIBLE
+                refreshWriteSecureSettingsStatus.visibility = View.GONE
+            } else if (RootAdbWifi(requireContext()).hasSufficientPrivileges()) {
                 rootAccessButton.isEnabled = false
                 rootAccessButton.text = getString(R.string.label_granted)
                 shizukuButton.isEnabled = false
                 shizukuButton.text = getString(R.string.label_not_needed)
                 updateContinueButton()
                 return
-            }
-            else if (ShizukuUtilities.hasShizukuPermission()) {
+            } else if (ShizukuAdbWifi(requireContext()).hasSufficientPrivileges()) {
                 rootAccessButton.isEnabled = true
                 rootAccessButton.text = getString(R.string.label_grant_permission)
                 shizukuButton.isEnabled = false
                 shizukuButton.text = getString(R.string.label_granted)
-            }
-            else {
+            } else {
                 shizukuButton.isEnabled = true
                 if (ShizukuUtilities.isShizukuAvailable()) {
                     shizukuButton.text = getString(R.string.label_grant_permission)
                     shizukuButton.setOnClickListener(requestShizukuPermission)
-                }
-                else {
+                } else {
                     shizukuButton.text = getString(R.string.label_setup_shizuku)
                     shizukuButton.setOnClickListener(proceedToShizukuWebsite)
                 }
@@ -195,8 +214,11 @@ class GrantPermissionsActivity : CollapsingToolbarActivity(
         }
 
         private fun updateContinueButton() {
-            continueButton.isEnabled =
-                isNotificationPermissionGranted(context) && hasSufficientPrivileges()
+            context?.let {
+                val adbWifi = AdbWifi.getPrivilegeMethod(it)
+
+                continueButton.isEnabled = isNotificationPermissionGranted(it) && adbWifi.hasSufficientPrivileges()
+            }
         }
 
         /**
@@ -211,8 +233,8 @@ class GrantPermissionsActivity : CollapsingToolbarActivity(
             val intent = requireActivity().intent
             intent.flags =
                 Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                Intent.FLAG_ACTIVITY_SINGLE_TOP or
-                Intent.FLAG_ACTIVITY_NEW_TASK
+                        Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                        Intent.FLAG_ACTIVITY_NEW_TASK
 
             val pendingIntent = PendingIntent.getActivity(
                 requireActivity().baseContext,

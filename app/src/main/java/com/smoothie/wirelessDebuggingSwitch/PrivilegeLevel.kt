@@ -1,7 +1,7 @@
 package com.smoothie.wirelessDebuggingSwitch
 
-enum class PrivilegeLevel {
-    User,
-    Shizuku,
-    Root
-}
+//enum class PrivilegeLevel {
+//    User,
+//    Shizuku,
+//    Root
+//}

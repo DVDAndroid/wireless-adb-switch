@@ -13,6 +13,10 @@
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
 
+    <uses-permission
+        android:name="android.permission.WRITE_SECURE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+
     <application
         android:name=".WADBS"
         android:allowBackup="true"
@@ -108,7 +112,7 @@
         </receiver>
 
         <!-- Quick Settings Tile Service -->
-        
+
         <service
             android:name=".QSTileService"
             android:exported="true"

@@ -4,7 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.content.*
 import android.util.Log
 import com.smoothie.widgetFactory.ConfigurableWidget
-import com.smoothie.wirelessDebuggingSwitch.WirelessDebugging
+import com.smoothie.wirelessDebuggingSwitch.adb.AdbWifi
 
 abstract class SwitchWidget(private val className: String) : ConfigurableWidget(className) {
 
@@ -18,8 +18,7 @@ abstract class SwitchWidget(private val className: String) : ConfigurableWidget(
 
         private const val TAG = "SwitchWidget"
 
-        const val INTENT_FLAG_CHANGE_STATE =
-            "com.smoothie.wirelessDebuggingSwitch.intent.FLAG_CHANGE_STATE"
+        const val INTENT_FLAG_CHANGE_STATE = "com.smoothie.wirelessDebuggingSwitch.intent.FLAG_CHANGE_STATE"
 
         @JvmStatic
         protected var switchState: SwitchState = SwitchState.Disabled
@@ -38,17 +37,16 @@ abstract class SwitchWidget(private val className: String) : ConfigurableWidget(
         switchState = SwitchState.Waiting
         updateAllWidgets(context!!)
 
-        WirelessDebugging.setEnabled(context, !WirelessDebugging.getEnabled(context))
-        switchState =
-            if (WirelessDebugging.getEnabled(context))
-                SwitchState.Enabled
-            else
-                SwitchState.Disabled
+        val adbWifi = AdbWifi.getPrivilegeMethod(context)?.also { it.toggle() } ?: return
+        switchState = if (adbWifi.getEnabled())
+            SwitchState.Enabled
+        else
+            SwitchState.Disabled
 
         updateAllWidgets(context)
 
         if (switchState == SwitchState.Enabled)
-            WirelessDebugging.syncConnectionData(context)
+            adbWifi.syncConnectionData()
     }
 
     override fun onUpdate(
@@ -57,11 +55,11 @@ abstract class SwitchWidget(private val className: String) : ConfigurableWidget(
         appWidgetIds: IntArray?
     ) {
         super.onUpdate(context, appWidgetManager, appWidgetIds)
-        switchState =
-            if (WirelessDebugging.getEnabled(context!!))
-                SwitchState.Enabled
-            else
-                SwitchState.Disabled
+        val adbWifi = AdbWifi.getPrivilegeMethod(context ?: return) ?: return
+        switchState = if (adbWifi.getEnabled())
+            SwitchState.Enabled
+        else
+            SwitchState.Disabled
     }
 
     protected fun createStateSwitchIntent(context: Context): Intent {

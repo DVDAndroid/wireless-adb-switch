@@ -27,26 +27,26 @@ val centeredAlertDialogStyle =
  *
  * @return highest privilege level available
  */
-fun getPrivilegeLevel(
-    requiredPrivilegeLevel: PrivilegeLevel = PrivilegeLevel.Shizuku,
-    context: Context? = null,
-) : PrivilegeLevel {
-    val privilegeLevel: PrivilegeLevel =
-        if (Shell.isAppGrantedRoot() == true)
-            PrivilegeLevel.Root
-        else if (ShizukuUtilities.hasShizukuPermission())
-            PrivilegeLevel.Shizuku
-        else
-            PrivilegeLevel.User
-
-    if (privilegeLevel.ordinal < requiredPrivilegeLevel.ordinal) {
-        Log.e("Utilities.getPrivilegeLevel", "Required privilege level too high!")
-        if (context != null)
-            sendMissingPrivilegesNotification(context)
-    }
-
-    return privilegeLevel
-}
+//fun getPrivilegeLevel(
+//    requiredPrivilegeLevel: PrivilegeLevel = PrivilegeLevel.Shizuku,
+//    context: Context? = null,
+//) : PrivilegeLevel {
+//    val privilegeLevel: PrivilegeLevel =
+//        if (Shell.isAppGrantedRoot() == true)
+//            PrivilegeLevel.Root
+//        else if (ShizukuUtilities.hasShizukuPermission())
+//            PrivilegeLevel.Shizuku
+//        else
+//            PrivilegeLevel.User
+//
+//    if (privilegeLevel.ordinal < requiredPrivilegeLevel.ordinal) {
+//        Log.e("Utilities.getPrivilegeLevel", "Required privilege level too high!")
+//        if (context != null)
+//            sendMissingPrivilegesNotification(context)
+//    }
+//
+//    return privilegeLevel
+//}
 
 /**
  * Check whether you have a required privilege level and notify the user otherwise.
@@ -55,14 +55,14 @@ fun getPrivilegeLevel(
  *
  * @return whether the available privilegeLevel is higher or equal to [requiredPrivilegeLevel]
  */
-fun hasSufficientPrivileges(
-    requiredPrivilegeLevel: PrivilegeLevel = PrivilegeLevel.Shizuku,
-    context: Context? = null,
-): Boolean =
-    getPrivilegeLevel(
-        requiredPrivilegeLevel,
-        context,
-    ).ordinal >= requiredPrivilegeLevel.ordinal
+//fun hasSufficientPrivileges(
+//    requiredPrivilegeLevel: PrivilegeLevel = PrivilegeLevel.Shizuku,
+//    context: Context? = null,
+//): Boolean =
+//    getPrivilegeLevel(
+//        requiredPrivilegeLevel,
+//        context,
+//    ).ordinal >= requiredPrivilegeLevel.ordinal
 
 /**
  * Execute a shell command. This method will choose between Shizuku and root execution.
@@ -77,23 +77,23 @@ fun hasSufficientPrivileges(
  *
  * @return the output of a command if it executed successfully and an empty [String] otherwise
  */
-fun executeShellCommand(
-    command: String,
-    context: Context? = null,
-    requiredPrivilegeLevel: PrivilegeLevel = PrivilegeLevel.Shizuku,
-): String {
-    val privilegeLevel = getPrivilegeLevel(requiredPrivilegeLevel, context)
-
-    if (privilegeLevel == PrivilegeLevel.Root)
-        return Shell.cmd(command).exec().out.joinToString()
-    else if (privilegeLevel == PrivilegeLevel.Shizuku)
-        return ShizukuUtilities.executeCommand(command)
-
-    val message =
-        "Error executing a shell command! Neither Shizuku or root access are present."
-    Log.d("Utilities.executeShellCommand", message)
-    return ""
-}
+//fun executeShellCommand(
+//    command: String,
+//    context: Context? = null,
+//    requiredPrivilegeLevel: PrivilegeLevel = PrivilegeLevel.Shizuku,
+//): String {
+//    val privilegeLevel = getPrivilegeLevel(requiredPrivilegeLevel, context)
+//
+//    if (privilegeLevel == PrivilegeLevel.Root)
+//        return Shell.cmd(command).exec().out.joinToString()
+//    else if (privilegeLevel == PrivilegeLevel.Shizuku)
+//        return ShizukuUtilities.executeCommand(command)
+//
+//    val message =
+//        "Error executing a shell command! Neither Shizuku or root access are present."
+//    Log.d("Utilities.executeShellCommand", message)
+//    return ""
+//}
 
 @SuppressLint("MissingPermission")
 private fun sendMissingPrivilegesNotification(context: Context) {

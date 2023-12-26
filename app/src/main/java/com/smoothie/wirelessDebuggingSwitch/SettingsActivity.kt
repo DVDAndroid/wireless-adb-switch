@@ -24,32 +24,30 @@ class SettingsActivity : ApplicationPreferenceActivity(
     private lateinit var preferenceKdeConnect: PrimarySwitchPreference
     private lateinit var preferencePrefixData: PrimarySwitchPreference
 
-    private val kdeConnectSummaryProvider =
-        SummaryProvider<PrimarySwitchPreference> { preference ->
-            if (!KdeConnect.isInstalled(this))
-                return@SummaryProvider getString(R.string.preference_summary_need_kde_connect)
+    private val kdeConnectSummaryProvider = SummaryProvider<PrimarySwitchPreference> { preference ->
+        if (!KdeConnect.isInstalled(this))
+            return@SummaryProvider getString(R.string.preference_summary_need_kde_connect)
 
-            val manager = PreferenceManager.getDefaultSharedPreferences(this)
-            if (manager.getBoolean(preference.key, true))
-                return@SummaryProvider getString(R.string.state_enabled)
+        val manager = PreferenceManager.getDefaultSharedPreferences(this)
+        if (manager.getBoolean(preference.key, true))
+            return@SummaryProvider getString(R.string.state_enabled)
+        return@SummaryProvider getString(R.string.state_disabled)
+    }
+
+    private val prefixConnectionDataSummaryProvider = SummaryProvider<PrimarySwitchPreference> { preference ->
+        if (!KdeConnect.isInstalled(this))
+            return@SummaryProvider getString(R.string.preference_summary_need_kde_connect_integration)
+
+        val manager = PreferenceManager.getDefaultSharedPreferences(this)
+
+        if (!manager.getBoolean(preference.key, true))
             return@SummaryProvider getString(R.string.state_disabled)
-        }
 
-    private val prefixConnectionDataSummaryProvider =
-        SummaryProvider<PrimarySwitchPreference> { preference ->
-            if (!KdeConnect.isInstalled(this))
-                return@SummaryProvider getString(R.string.preference_summary_need_kde_connect_integration)
-
-            val manager = PreferenceManager.getDefaultSharedPreferences(this)
-
-            if (!manager.getBoolean(preference.key, true))
-                return@SummaryProvider getString(R.string.state_disabled)
-
-            return@SummaryProvider manager.getString(
-                    getString(R.string.key_connection_data_prefix),
-                    getString(R.string.default_connection_data_prefix)
-                )
-        }
+        return@SummaryProvider manager.getString(
+            getString(R.string.key_connection_data_prefix),
+            getString(R.string.default_connection_data_prefix)
+        )
+    }
 
     override fun onResume() {
         super.onResume()
@@ -103,10 +101,12 @@ class SettingsActivity : ApplicationPreferenceActivity(
         preferenceAppVersion.summary = BuildConfig.VERSION_NAME
         preferenceAppVersion.setOnPreferenceClickListener { _ ->
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            clipboard.setPrimaryClip(ClipData.newPlainText(
-                getString(R.string.preference_name_app_version),
-                BuildConfig.VERSION_NAME
-            ))
+            clipboard.setPrimaryClip(
+                ClipData.newPlainText(
+                    getString(R.string.preference_name_app_version),
+                    BuildConfig.VERSION_NAME
+                )
+            )
             Toast.makeText(this, R.string.message_copied, Toast.LENGTH_SHORT).show()
             return@setOnPreferenceClickListener false
         }

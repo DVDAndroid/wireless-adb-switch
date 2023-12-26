@@ -15,7 +15,6 @@
         android:background="@drawable/shape_large_corners"
         style="@style/ShapeAppearance.Material3.Corner.Large">
 
-
         <ImageView
             android:id="@+id/explanation_icon"
             android:layout_width="24dp"
@@ -70,6 +69,103 @@
         style="@style/TextAppearance.AppCompat.Body1"
         android:text="@string/message_explain_notifications"
         android:paddingVertical="8dp"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/refresh_write_secure_settings_status"
+            style="@style/TextAppearance.Material3.TitleLarge"
+            android:text="@string/title_write_secure_settings" />
+
+        <Button
+            android:id="@+id/refresh_write_secure_settings_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Widget.Material3.Button.IconButton"
+            app:icon="@drawable/round_refresh_24"
+            app:layout_constraintEnd_toStartOf="@id/write_secure_settings_status"
+            app:layout_constraintTop_toTopOf="parent"
+            android:tooltipText="@string/hint_refresh_write_secure_settings"/>
+
+        <Button
+            android:visibility="gone"
+            android:id="@+id/write_secure_settings_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            style="@style/Widget.Material3.Button.IconButton.Filled"
+            android:text="@string/label_granted" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="8dp"
+        android:text="@string/message_write_secure_settings" />
+
+    <LinearLayout
+        android:id="@+id/write_secure_settings_command_container"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            style="@style/TextAppearance.AppCompat.Body1"
+            android:text="@string/message_write_secure_settings_run_command"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            style="@style/ShapeAppearance.Material3.Corner.Small"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shape_large_corners"
+            android:backgroundTint="@color/colorSecondaryContainer"
+            android:padding="16dp">
+
+            <ImageView
+                android:id="@+id/button_copy_write_secure_settings_command"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/content_copy_24"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/colorSecondary" />
+
+            <EditText
+                android:id="@+id/write_secure_settings_command"
+                style="@style/MaterialAlertDialog.Material3.Body.Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@null"
+                android:focusable="false"
+                android:fontFamily="monospace"
+                android:singleLine="true"
+                android:text="@string/command_write_secure_settings"
+                android:paddingStart="0dp"
+                android:paddingEnd="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/button_copy_write_secure_settings_command"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

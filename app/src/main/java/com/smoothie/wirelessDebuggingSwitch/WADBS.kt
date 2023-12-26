@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import androidx.core.app.NotificationManagerCompat
 import com.smoothie.widgetFactory.ConfigurableWidget
 import com.smoothie.widgetFactory.WidgetFactoryApplication
+import com.smoothie.wirelessDebuggingSwitch.adb.AdbWifi
 import com.smoothie.wirelessDebuggingSwitch.widget.BasicWidget
 import com.smoothie.wirelessDebuggingSwitch.widget.InformationWidget
 import com.topjohnwu.superuser.Shell
@@ -36,7 +37,9 @@ class WADBS : WidgetFactoryApplication() {
 
         notificationManager =  NotificationManagerCompat.from(this)
         createMissingPrivilegeNotificationsChannel()
-        if (hasSufficientPrivileges())
+
+        val adbWifi = AdbWifi.getPrivilegeMethod(this) ?: return
+        if (adbWifi.hasSufficientPrivileges())
             notificationManager.cancel(PRIVILEGE_NOTIFICATION_ID)
     }
 

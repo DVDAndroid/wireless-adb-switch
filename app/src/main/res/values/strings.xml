@@ -5,6 +5,7 @@
     <string name="app_name" translatable="false">Wireless Debugging Switch</string>
     <string name="kde_connect" translatable="false">KDE Connect</string>
     <string name="title_shizuku" translatable="false">Shizuku</string>
+    <string name="command_write_secure_settings" translatable="false">adb shell pm grant com.smoothie.wirelessDebuggingSwitch android.permission.WRITE_SECURE_SETTINGS</string>
 
     <string name="label_wireless_debugging">Wireless debugging</string>
     <string name="label_wireless_debugging_two_lines">Wireless\nDebugging</string>
@@ -26,6 +27,7 @@
 
     <string name="title_additional_setup">Additional setup</string>
     <string name="title_root_access">Root access</string>
+    <string name="title_write_secure_settings">Write Secure Settings</string>
     <string name="title_notifications">Notifications</string>
     <string name="title_root_access_notifications">Root access notifications</string>
     <string name="title_instant_connection">Instant connection</string>
@@ -34,6 +36,7 @@
     <string name="title_debugging_disabled">Debugging is disabled</string>
 
     <string name="hint_refresh_shizuku">Refresh Shizuku availability</string>
+    <string name="hint_refresh_write_secure_settings">Refresh WRITE_SECURE_SETTINGS permission status</string>
 
     <string name="message_failed_sending_clipboard">Failed to send clipboard!</string>
     <string name="message_error_copying_connection_data">"Error copying connection information!\n    "</string>
@@ -42,6 +45,8 @@
     <string name="message_need_at_least_shizuku">You need to either provide root access or the permission to use Shizuku.</string>
     <string name="message_welcome">Welcome to WADBS, a small companion app that makes your life as a developer much easier! Before you start, please, grant some necessary permissions.</string>
     <string name="message_explain_notifications">WADBS will display a notification when it encounters an error which is usually because it lacks a needed set of privileges.</string>
+    <string name="message_write_secure_settings">Enabling the WRITE_SECURE_SETTINGS permission grants the ability to toggle ADB Wifi without requiring root access.\nThis permission is optional if you use Shizuku.</string>
+    <string name="message_write_secure_settings_run_command">You need to execute the following command through a computer first.</string>
     <string name="message_explain_root_access">Root access allows WADBS to change the state of Wireless Debugging, gather connection data and interact with KDE Connect to instantly pair your Android device with your PC via local network.\nThis permission is optional if you use Shizuku.</string>
     <string name="message_explain_shizuku">Alternatively to Root access WADBS can utilize Shizuku to gain the needed set of privileges. Note that KDE Connect integration does not work with Shizuku.</string>
     <string name="message_grant_permission_before_leaving">Please, provide all of the required permissions and then tap \"Continue\".</string>

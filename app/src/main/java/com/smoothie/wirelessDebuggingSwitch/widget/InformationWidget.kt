@@ -3,7 +3,10 @@ package com.smoothie.wirelessDebuggingSwitch.widget
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE
 import android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_IDS
-import android.content.*
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
 import android.util.Log
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -11,9 +14,8 @@ import android.widget.RemoteViews
 import android.widget.Toast
 import com.smoothie.widgetFactory.ConfigurableWidget
 import com.smoothie.wirelessDebuggingSwitch.R
-import com.smoothie.wirelessDebuggingSwitch.WirelessDebugging
+import com.smoothie.wirelessDebuggingSwitch.adb.AdbWifi
 import com.smoothie.wirelessDebuggingSwitch.getLightOrDarkTextColor
-import com.smoothie.wirelessDebuggingSwitch.hasSufficientPrivileges
 
 class InformationWidget : ConfigurableWidget(InformationWidget::class.java.name) {
 
@@ -35,13 +37,14 @@ class InformationWidget : ConfigurableWidget(InformationWidget::class.java.name)
         widgetId: Int,
         preferences: SharedPreferences
     ): RemoteViews {
-        if (!hasSufficientPrivileges())
+        val adbWifi = AdbWifi.getPrivilegeMethod(context)
+        if (adbWifi == null || !adbWifi.hasSufficientPrivileges())
             return getMissingPrivilegesRemoteViews(context, preferences)
 
         val views = RemoteViews(context.packageName, R.layout.widget_information)
         applyRemoteViewsParameters(context, preferences, views)
 
-        val debuggingEnabled = WirelessDebugging.getEnabled(context)
+        val debuggingEnabled = adbWifi.getEnabled()
         views.setViewVisibility(R.id.data_enabled, if (debuggingEnabled) VISIBLE else GONE)
         views.setViewVisibility(R.id.data_disabled, if (!debuggingEnabled) VISIBLE else GONE)
 
@@ -52,10 +55,9 @@ class InformationWidget : ConfigurableWidget(InformationWidget::class.java.name)
         var address: String
         var port: String
         try {
-            address = WirelessDebugging.getAddress(context)
-            port = WirelessDebugging.getPort(context)
-        }
-        catch (exception: Exception) {
+            address = adbWifi.getAddress()
+            port = adbWifi.getPort()
+        } catch (exception: Exception) {
             connectionDataError = true
             Log.e(TAG, "Failed to get connection data!")
             exception.printStackTrace()
@@ -105,11 +107,7 @@ class InformationWidget : ConfigurableWidget(InformationWidget::class.java.name)
             return false
         }
 
-        val label = "Connection Data"
-        val content = "$address:$port"
-        val clipboardManager =
-            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        clipboardManager.setPrimaryClip(ClipData.newPlainText(label, content))
+        AdbWifi.getPrivilegeMethod(context)?.copyConnectionData() ?: return false
 
         val message = context.getString(R.string.message_copied)
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
